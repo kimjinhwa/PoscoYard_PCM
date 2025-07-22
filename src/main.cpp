@@ -71,6 +71,7 @@ void readAndWriteEprom(){
   }
 }
 void upLoder(){
+    selfUploder.setLed(LED_PORT);
     selfUploder.begin("AndroidHotspot1953", "87654321", "https://raw.githubusercontent.com/kimjinhwa/PoscoYard_PCM/refs/heads/main/uploadFirmware");
 
     Serial.println("Booting Sketch...");
