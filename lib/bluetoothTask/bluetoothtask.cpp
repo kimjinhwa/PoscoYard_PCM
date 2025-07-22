@@ -85,10 +85,18 @@ void pass_Callback(cmd *cmdPtr){
     }
 
 }
-void ref_Callback(cmd *cmdPtr){
+void relayControl_Callback(cmd *cmdPtr){
     Command cmd(cmdPtr);
     Argument arg = cmd.getArgument(0);
-    String ref = arg.getValue();
+    String relayValue = arg.getValue();
+    if(relayValue.length() > 0){
+        relayControl.setRelayStatus(relayValue.toInt());
+        SerialBT.printf("RELAY STATUS : %d\n", relayControl.readRelayStatus());
+    }
+    else{
+        SerialBT.printf("RELAY STATUS : %d\n", relayControl.readRelayStatus());
+    }
+
 }
 void again_Callback(cmd *cmdPtr)
 {
@@ -114,42 +122,21 @@ void again_Callback(cmd *cmdPtr)
     }
 
 }
-void tgain_Callback(cmd *cmdPtr)
+void maxChargeAmpere_Callback(cmd *cmdPtr)
 {
     Command cmd(cmdPtr);
     Argument arg = cmd.getArgument(0);
-    String gain = arg.getValue();
-    if(gain.length() > 0){
-        SerialBT.printf("Current GAIN : %d\n", nvmSet.TotalVoltageGain);
-        nvmSet.TotalVoltageGain = gain.toInt();
+    String maxChargeAmpere = arg.getValue();
+    if(maxChargeAmpere.length() > 0){
+        SerialBT.printf("Current MAX CHARGE AMPERE : %d\n", nvmSet.CutOffChargeAmpere);
+        nvmSet.CutOffChargeAmpere = maxChargeAmpere.toInt();
         EEPROM.writeBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); //Write to EEPROM
         EEPROM.commit(); //Commit EEPROM
         EEPROM.readBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); //Read from EEPROM
-        SerialBT.printf("OFFSET : %d\n", nvmSet.TotalVoltageOffset);
-        SerialBT.printf("New GAIN : %d\n", nvmSet.TotalVoltageGain);
+        SerialBT.printf("New MAX CHARGE AMPERE : %d\n", nvmSet.CutOffChargeAmpere);
     }
     else{
-        SerialBT.printf("GAIN : %d\n", nvmSet.TotalVoltageGain);
-        SerialBT.printf("OFFSET : %d\n", nvmSet.TotalVoltageOffset);
-    }
-}
-void vgain_Callback(cmd *cmdPtr)
-{
-    Command cmd(cmdPtr);
-    Argument arg = cmd.getArgument(0);
-    String gain = arg.getValue();
-    if(gain.length() > 0){
-        SerialBT.printf("Current GAIN : %d\n", nvmSet.Max1161_CellGain);
-        nvmSet.Max1161_CellGain = gain.toInt();
-        EEPROM.writeBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); //Write to EEPROM
-        EEPROM.commit(); //Commit EEPROM
-        EEPROM.readBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); //Read from EEPROM
-        SerialBT.printf("OFFSET : %d\n", nvmSet.Max1161_CellOffset);
-        SerialBT.printf("New GAIN : %d\n", nvmSet.Max1161_CellGain);
-    }
-    else{
-        SerialBT.printf("GAIN : %d\n", nvmSet.Max1161_CellGain);
-        SerialBT.printf("OFFSET : %d\n", nvmSet.Max1161_CellOffset);
+        SerialBT.printf("MAX CHARGE AMPERE : %d\n", nvmSet.CutOffChargeAmpere);
     }
 }
 
@@ -175,46 +162,23 @@ void aoffset_Callback(cmd *cmdPtr)
     }
 
 }
-void toffset_Callback(cmd *cmdPtr)
+void minDischargeAmpere_Callback(cmd *cmdPtr)
 {
     Command cmd(cmdPtr);
     Argument arg = cmd.getArgument(0);
     String offset = arg.getValue();
     if (offset.length() > 0)
     {
-        SerialBT.printf("Current OFFSET : %d\n", nvmSet.TotalVoltageOffset);
-        nvmSet.TotalVoltageOffset = offset.toInt();
+        SerialBT.printf("Current MIN DISCHARGE AMPERE : %d\n", nvmSet.CutOffDischargeAmpere);
+        nvmSet.CutOffDischargeAmpere = offset.toInt();
         EEPROM.writeBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); // Write to EEPROM
         EEPROM.commit();                                             // Commit EEPROM
         EEPROM.readBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet));  // Read from EEPROM
-        SerialBT.printf("GAIN : %d\n", nvmSet.TotalVoltageGain);
-        SerialBT.printf("New OFFSET : %d\n", nvmSet.TotalVoltageOffset);
+        SerialBT.printf("New MIN DISCHARGE AMPERE : %d\n", nvmSet.CutOffDischargeAmpere);
     }
     else
     {
-        SerialBT.printf("OFFSET : %d\n", nvmSet.TotalVoltageOffset);
-        SerialBT.printf("GAIN : %d\n", nvmSet.TotalVoltageGain);
-    }
-}
-void voffset_Callback(cmd *cmdPtr)
-{
-    Command cmd(cmdPtr);
-    Argument arg = cmd.getArgument(0);
-    String offset = arg.getValue();
-    if (offset.length() > 0)
-    {
-        SerialBT.printf("Current OFFSET : %d\n", nvmSet.Max1161_CellOffset);
-        nvmSet.Max1161_CellOffset = offset.toInt();
-        EEPROM.writeBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); // Write to EEPROM
-        EEPROM.commit();                                             // Commit EEPROM
-        EEPROM.readBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet));  // Read from EEPROM
-        SerialBT.printf("GAIN : %d\n", nvmSet.Max1161_CellGain);
-        SerialBT.printf("New OFFSET : %d\n", nvmSet.Max1161_CellOffset);
-    }
-    else
-    {
-        SerialBT.printf("OFFSET : %d\n", nvmSet.Max1161_CellOffset);
-        SerialBT.printf("GAIN : %d\n", nvmSet.Max1161_CellGain);
+        SerialBT.printf("MIN DISCHARGE AMPERE : %d\n", nvmSet.CutOffDischargeAmpere);
     }
 }
 void UseHoleCTRatio_Callback(cmd *cmdPtr)
@@ -270,13 +234,11 @@ Command id;
 Command cells;
 Command ssid;
 Command pass;
-Command ref;
+Command relayCommand;
 Command again;
 Command aoffset;
-Command vgain;
-Command voffset;
-Command tgain;
-Command toffset;
+Command maxChargeAmpere_command;
+Command minDischargeAmpere_command;
 Command UseHoleCTRatio;
 Command help;
 Command ip;
@@ -294,20 +256,16 @@ void simpleCliSetup()
     ssid.setDescription("Set the SSID");
     pass = simpleCli.addSingleArgCmd("pass", pass_Callback);//PASS
     pass.setDescription("Set the PASS");
-    ref = simpleCli.addSingleArgCmd("ref", ref_Callback);//REF
-    ref.setDescription("Set the REF");
+    relayCommand = simpleCli.addSingleArgCmd("relay", relayControl_Callback);//REF
+    relayCommand.setDescription("Set the Relay Control");
     again = simpleCli.addSingleArgCmd("again", again_Callback);//GAINo
     again.setDescription("Set the Ampere GAIN");
     aoffset = simpleCli.addSingleArgCmd("aoff/set", aoffset_Callback);//OFFSET
     aoffset.setDescription("Set the Ampere OFFSET");
-    vgain = simpleCli.addSingleArgCmd("vgain", vgain_Callback);//GAINo
-    vgain.setDescription("Set the Voltage GAIN");
-    tgain = simpleCli.addSingleArgCmd("tgain", tgain_Callback);//GAINo
-    tgain.setDescription("Set the Total Voltage GAIN");
-    toffset = simpleCli.addSingleArgCmd("toff/set", toffset_Callback);//OFFSET
-    toffset.setDescription("Set the Total Voltage OFFSET");
-    voffset = simpleCli.addSingleArgCmd("voff/set", voffset_Callback);//OFFSET
-    voffset.setDescription("Set the Voltage OFFSET");
+    maxChargeAmpere_command = simpleCli.addSingleArgCmd("max/ChargeAmpere", maxChargeAmpere_Callback);//GAINo
+    maxChargeAmpere_command.setDescription("Set the Max Charge Ampere");
+    minDischargeAmpere_command = simpleCli.addSingleArgCmd("min/Ampere", minDischargeAmpere_Callback);//OFFSET
+    minDischargeAmpere_command.setDescription("Set the Min Discharge Ampere");
     UseHoleCTRatio = simpleCli.addSingleArgCmd("use/current", UseHoleCTRatio_Callback);//USE HOLE CT
     UseHoleCTRatio.setDescription("Set the USE HOLE CT");
     ip = simpleCli.addSingleArgCmd("ip", ip_Callback);//IP

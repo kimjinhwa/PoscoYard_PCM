@@ -67,7 +67,7 @@ typedef union {
 
 class ReadAmpereClass{
 private:
-  int16_t ampereFIFO[FIFO_SIZE];
+  float ampereFIFO[FIFO_SIZE];
   int head;
   int count;
 public:
@@ -75,9 +75,9 @@ public:
 	ReadAmpereClass();
   float ampereAverage;
   void initFIFO();
-  float updateAmpereFIFO(int16_t newvalue);
+  float updateAmpereFIFO(float newvalue);
   static SemaphoreHandle_t dataMutex;
-	int16_t readAmpereAdc();
+	float readAmpereAdc();
 };
 extern ReadAmpereClass _ReadAmpereClass;
 #endif

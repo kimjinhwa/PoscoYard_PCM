@@ -16,13 +16,13 @@ void ReadAmpereClass::initFIFO()
   for (int j = 0; j < FIFO_SIZE; j++)  // 20 samples per cell
     ampereFIFO[j] = 0;
 }
-float ReadAmpereClass::updateAmpereFIFO(int16_t newvalue) {
+float ReadAmpereClass::updateAmpereFIFO(float newvalue) {
   ampereFIFO[head] = newvalue;
   head = (head + 1) % FIFO_SIZE;
   if(count < FIFO_SIZE) {
     count++;
   }
-  int32_t sum = 0;
+  float sum = 0.0f;
   for(int i=0; i<count; i++) {
     sum += ampereFIFO[i];
   }
@@ -36,7 +36,7 @@ ReadAmpereClass::ReadAmpereClass()
     if(dataMutex == NULL) dataMutex = xSemaphoreCreateMutex();
 }
 
-int16_t ReadAmpereClass::readAmpereAdc()
+float ReadAmpereClass::readAmpereAdc()
 {
     uint32_t adc_voltage1;
     int holeCTdirection = nvmSet.HoleCTdirection == 0 ? 1 : -1;
@@ -51,14 +51,14 @@ int16_t ReadAmpereClass::readAmpereAdc()
     adc_voltage1 = adc_voltage1 * nvmSet.AmpereGain / 1000.0;
     //ESP_LOGI("AMPERE", "adc_voltage1: %d\n", (int32_t)adc_voltage1);
     float voltage = (adc_voltage1 - 2000.0) * 2.0;  // 읽은 전압에서 중간값인 2.0V를 빼서 중간값을 0V로 만든다.
-    int32_t ampere = voltage * nvmSet.UseHoleCTRatio /HOLE_CT_V ;
+    float ampere = voltage * nvmSet.UseHoleCTRatio /HOLE_CT_V ;
     ampere *= holeCTdirection;
     //ESP_LOGI("AMPERE", "ampere: %d\n", (int32_t)ampere);
     if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS)
     {
-      updateAmpereFIFO((int16_t)ampere);
+      updateAmpereFIFO(ampere);
       xSemaphoreGive(ReadAmpereClass::dataMutex);
     }
     //ESP_LOGI("AMPERE", "ampereAverate: %3.2f\n", ampereAverage);
-    return (int16_t)ampere;
+    return ampere;
 }

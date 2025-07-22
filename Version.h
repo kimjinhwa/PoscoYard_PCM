@@ -1,4 +1,5 @@
-#define VERSION "1.0.1"  // 모든 기능을 구현 함. 
+#define VERSION "1.0.2"  // 전류를 Float로 변경 
+//#define VERSION "1.0.1"  // 모든 기능을 구현 함. 
 //#define VERSION "0.9.5"  // Modbus Address 변경시 자동으로 등록되도록 함. 
 //#define VERSION "0.9.4"  // 밸런싱 기능 추가 
 //#define VERSION "0.9.3"  // Add Modbus Balance Target Voltage 

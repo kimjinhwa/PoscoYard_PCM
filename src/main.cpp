@@ -71,7 +71,7 @@ void readAndWriteEprom(){
   }
 }
 void upLoder(){
-    selfUploder.begin("AndroidHotspot1953", "87654321", "https://raw.githubusercontent.com/kimjinhwa/IP-Fineder-For-ESP32/main/dist/poscoYardPCM");
+    selfUploder.begin("AndroidHotspot1953", "87654321", "https://raw.githubusercontent.com/kimjinhwa/PoscoYard_PCM/refs/heads/main/uploadFirmware");
 
     Serial.println("Booting Sketch...");
     WiFi.mode(WIFI_AP_STA);
@@ -211,7 +211,7 @@ void loop()
     esp_task_wdt_reset();
     long currentTime = millis();
    
-    if(timerCount > 200)  // 200ms
+    if(timerCount > 20)  // 200ms
     {
         _ReadAmpereClass.readAmpereAdc();
         timerCount = 0;

@@ -147,7 +147,7 @@ public:
             if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
                 all_charge_discharge();
                 //SerialBT.printf("\nRelay2,1 On\n");
-                Serial.printf("Relay2,1 On\n");
+                Serial.printf("\nRelay2,1 On\n");
             }
         }
     }
