@@ -77,7 +77,7 @@ public:
   void initFIFO();
   float updateAmpereFIFO(int16_t newvalue);
   static SemaphoreHandle_t dataMutex;
-	uint16_t readAmpereAdc();
+	int16_t readAmpereAdc();
 };
 extern ReadAmpereClass _ReadAmpereClass;
 #endif

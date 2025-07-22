@@ -4,7 +4,7 @@
 #include "../../src/main.h"
 #include "../../version.h"
 ModbusServerRTU MBserver(2000,GPIO_NUM_33);
-uint16_t sendBuffer[100];
+int16_t sendBuffer[100];
 void getVersion(int16_t *desc){
   String ver = String(VERSION);
   int16_t firstDot = ver.indexOf(".");
@@ -48,10 +48,15 @@ ModbusMessage BmsModbus::FC03(ModbusMessage request)
   sendBuffer[16] = 0; //nvmSet.spiBalance02;
   sendBuffer[17] = 0; //nvmSet.CanIBalance;
   sendBuffer[18] = 0; //nvmSet.BalanceTargetVoltage;
-  sendBuffer[19] = nvmSet.CutOffChargeAmpere;
-  sendBuffer[20] = nvmSet.CutOffDischargeAmpere;
-  sendBuffer[21] = nvmSet.ResumeGapAmpere;
-  sendBuffer[22] = nvmSet.RelayDelayTime;
+  sendBuffer[30] = (digitalRead(RELAY1_DISCHARGE) << 0) | 
+                   (digitalRead(RELAY2_CHARGE) << 1) | 
+                   (digitalRead(RELAY3_RESERVE) << 2);
+  sendBuffer[31] = 0;
+  sendBuffer[32] = nvmSet.CutOffChargeAmpere;
+  sendBuffer[33] = nvmSet.CutOffDischargeAmpere;
+  sendBuffer[34] = nvmSet.ResumeGapAmpere;
+  sendBuffer[35] = nvmSet.RelayDelayTime;
+  sendBuffer[36] = nvmSet.HoleCTdirection;
   // get request values
   request.get(2, address);
   request.get(4, words);
@@ -118,7 +123,7 @@ ModbusMessage BmsModbus::FC06(ModbusMessage request)
   request.get(2, address);
   request.get(4, words);
 
-  if (address  < 19) {
+  if (address  < 100) {
     // Looks okay. Set up message with serverID, FC and length of data
     switch(address){
       case 0:
@@ -139,7 +144,7 @@ ModbusMessage BmsModbus::FC06(ModbusMessage request)
         // nvmSet.Max1161_CellOffset = words;  // offset
         break;
       case 9:
-        // nvmSet.UseHoleCTRatio = words;
+        nvmSet.UseHoleCTRatio = words;
         break;
       case 10:
         // nvmSet.TempOffset = words;
@@ -171,14 +176,23 @@ ModbusMessage BmsModbus::FC06(ModbusMessage request)
       case 30:  // PCM Board Status  
         break;
       case 31:  // PCM Board Controll
+        sendBuffer[31] = (words & 0x01) | ((words & 0x02) << 1) | ((words & 0x04) << 2);
+        relayControl.setRelayStatus(words);
         break;
       case 32:  // PCM Board Cut off Charge Ampere
+        nvmSet.CutOffChargeAmpere = words;
         break;
       case 33:  // PCM Board Cut off Discharge Ampere
+        nvmSet.CutOffDischargeAmpere = words;
         break;
       case 34:  // PCM Board Resume Gap Ampere 
+        nvmSet.ResumeGapAmpere = words;
         break;
       case 35:  // Relay Delay time 
+        nvmSet.RelayDelayTime = words;
+        break;
+      case 36:  // Hole CT direction
+        nvmSet.HoleCTdirection = words;
         break;
       default:
         break;

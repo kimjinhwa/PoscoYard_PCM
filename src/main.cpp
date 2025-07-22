@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include <readAmpere.h>
 #include <SPI.h>
+#include <BluetoothSerial.h>
 #include "bluetoothtask.h"
 #include <HardwareSerial.h>
 #include <driver/uart.h>
@@ -27,6 +28,7 @@ ReadAmpereClass _ReadAmpereClass;
 
 // ThreeWire max11163wire(DATAIN_MISO, SPICLOCK, SEL_MAX11163 );
 
+RelayControl relayControl;
 extern WebServer webServer;
 BmsModbus bmsModbus;
 nvmSystemSet nvmSet;
@@ -62,7 +64,7 @@ void readAndWriteEprom(){
       nvmSet.CutOffDischargeAmpere = 1000; // 100A
       nvmSet.ResumeGapAmpere = 100; // 10A
       nvmSet.RelayDelayTime = 1;  //second
-      nvmSet.Reserved8 = 0;
+      nvmSet.HoleCTdirection = 0;
       nvmSet.EpromValidEnd = 0xAA;
       EEPROM.writeBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet));
       EEPROM.commit();
@@ -124,6 +126,7 @@ void upLoder(){
 }
 uint16_t timerCount = 0;
 void IRAM_ATTR onTimer(){
+    relayControl.userRelayOnTime++ ;
     timerCount++;
 }
 void useInterrupt(){
@@ -144,18 +147,21 @@ void initPin(){
     pinMode(ASEL3, INPUT_PULLUP);
 
     pinMode(RELAY1_DISCHARGE, OUTPUT);
-    digitalWrite(RELAY1_DISCHARGE, HIGH);
+    digitalWrite(RELAY1_DISCHARGE, LOW);
     pinMode(RELAY2_CHARGE, OUTPUT);
-    digitalWrite(RELAY2_CHARGE, HIGH);
+    digitalWrite(RELAY2_CHARGE, LOW);
     pinMode(RELAY3_RESERVE, OUTPUT);
-    digitalWrite(RELAY3_RESERVE, HIGH);
+    digitalWrite(RELAY3_RESERVE, LOW);
     // 초기 상태 확인을 위한 디버깅
     delay(100); // 핀 상태 안정화 대기
 }
 
+
+
 void setup()
 {
     Serial.begin(115200);
+    initPin();
     EEPROM.begin(sizeof(nvmSystemSet));
     readAndWriteEprom();
     _ReadAmpereClass.VREF = float(nvmSet.Max1161_RefVolt) / 1000.0;
@@ -185,22 +191,6 @@ void setup()
     bmsModbus.setup();
     useInterrupt();
 }
-void readTemperature(){
-    uint32_t adc_voltage1;
-    uint32_t adc_voltage2;
-    uint32_t adc_voltage3;
-
-    esp_adc_cal_characteristics_t adc_chars;
-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_12, ADC_WIDTH_BIT_12, 1100, &adc_chars);
-    esp_adc_cal_get_voltage(ADC_CHANNEL_3, &adc_chars, &adc_voltage1);  // IN_TH = GPIO39 = ADC1_CH3
-    esp_adc_cal_get_voltage(ADC_CHANNEL_6, &adc_chars, &adc_voltage2);  // TH3 = GPIO34 = ADC1_CH6
-    esp_adc_cal_get_voltage(ADC_CHANNEL_7, &adc_chars, &adc_voltage3);  // TH4 = GPIO35 = ADC1_CH7
-
-    if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS)
-    {
-        xSemaphoreGive(ReadAmpereClass::dataMutex);
-    }
-}
 uint8_t readModbusAddress(){
     uint8_t address = 0;
     if(analogRead(ASEL1) > 1000) address += 1;
@@ -215,10 +205,12 @@ uint8_t readModbusAddress(){
     }
     return address;
 }
+extern BluetoothSerial SerialBT;
 void loop()
 {
     esp_task_wdt_reset();
     long currentTime = millis();
+   
     if(timerCount > 200)  // 200ms
     {
         _ReadAmpereClass.readAmpereAdc();
@@ -227,11 +219,12 @@ void loop()
     if (currentTime - elaspedTime250 > EVERY_250)
     {
         elaspedTime250 = currentTime;
-        readTemperature();
     }
     if (currentTime - elaspedTime1000 > EVERY_1000)
     {
         elaspedTime1000 = currentTime;
+        LED_TOGGLE;
+        relayControl.OnOffbyAmpere();
         readModbusAddress();
     }
 
@@ -241,8 +234,17 @@ void loop()
         float totalVoltage = 0.0;
         uint16_t maxVol;
         uint16_t minVol=65535;
-        Serial.printf("AMP: %2.1fA ", _ReadAmpereClass.ampereAverage );
-        Serial.printf("\n");
+        SerialBT.printf("\r\nR:%d C:%3.1f D:%3.1f A:%3.2f",
+                relayControl.readRelayStatus(),
+                (float)nvmSet.CutOffChargeAmpere/10.0,
+                (float)nvmSet.CutOffDischargeAmpere/10.0,
+                _ReadAmpereClass.ampereAverage);
+        Serial.printf("\r\nR:%d C:%3.2f D:%3.2f A:%3.1f",
+                relayControl.readRelayStatus(),
+                (float)nvmSet.CutOffChargeAmpere/10.0,
+                (float)nvmSet.CutOffDischargeAmpere/10.0,
+                _ReadAmpereClass.ampereAverage);
     }
     delay(5);
 }
+
