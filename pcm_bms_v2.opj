@@ -14,9 +14,14 @@
   (GlobalState
     (FileView
       (Path "Design Resources")
-      (Path "Design Resources" ".\pcm_bms_v2.dsn")
-      (Path "Design Resources" ".\pcm_bms_v2.dsn" "SCHEMATIC1")
-      (Select "Design Resources" ".\pcm_bms_v2.dsn" "SCHEMATIC1" "PCM_BMS_V2"))
+      (Path "Design Resources"
+         "c:\devwork\4.iftechwork\6.posco_bms2_yard\pcm_board\pcm_bms_v2.dsn")
+      (Path "Design Resources"
+         "c:\devwork\4.iftechwork\6.posco_bms2_yard\pcm_board\pcm_bms_v2.dsn"
+         "SCHEMATIC1")
+      (Select "Design Resources"
+         "c:\devwork\4.iftechwork\6.posco_bms2_yard\pcm_board\pcm_bms_v2.dsn"
+         "SCHEMATIC1" "PCM_BMS_V2"))
     (HierarchyView)
     (Doc
       (Type "COrCapturePMDoc")
@@ -27,7 +32,7 @@
       (Type "COrSchematicDoc")
       (Frame
         (Placement "44 2 3 -1 -1 -8 -31 52 1517 52 723")
-        (Scroll "0 0")
+        (Scroll "0 198")
         (Zoom "112")
         (Occurrence "/"))
       (Path

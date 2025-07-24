@@ -41,7 +41,7 @@ typedef struct
   uint32_t GATEWAY;
   uint32_t SUBNETMASK;
   uint16_t UseHoleCTRatio;
-  int16_t TempOffset;
+  int16_t TempCutOff;
   int16_t AmpereOffset;
   uint16_t AmpereGain;
   uint16_t TotalVoltageOffset;
@@ -131,7 +131,7 @@ public:
             if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
                 only_charge();
                 //SerialBT.printf("\nRelay2 Onn");
-                Serial.printf("\nRelay2 Onn");
+                //Serial.printf("\nRelay2 Onn");
             }
         }
         else if (_ReadAmpereClass.ampereAverage < (float)nvmSet.CutOffDischargeAmpere/10.0)
@@ -139,7 +139,7 @@ public:
             if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
                 only_discharge();
                 //SerialBT.printf("\nRelay1 On\n");
-                Serial.printf("Relay1 On\n");
+                //Serial.printf("Relay1 On\n");
             }
         }
         else
@@ -147,7 +147,7 @@ public:
             if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
                 all_charge_discharge();
                 //SerialBT.printf("\nRelay2,1 On\n");
-                Serial.printf("\nRelay2,1 On\n");
+                //Serial.printf("\nRelay2,1 On\n");
             }
         }
     }

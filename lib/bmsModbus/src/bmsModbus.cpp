@@ -39,7 +39,7 @@ ModbusMessage BmsModbus::FC03(ModbusMessage request)
   sendBuffer[7] = firmVersion[2];  // patch version
   sendBuffer[8] = 0;
   sendBuffer[9] = nvmSet.UseHoleCTRatio;
-  sendBuffer[10] = nvmSet.TempOffset;
+  sendBuffer[10] = nvmSet.TempCutOff;
   sendBuffer[11] = nvmSet.AmpereOffset;
   sendBuffer[12] = nvmSet.AmpereGain;
   sendBuffer[13] = nvmSet.TotalVoltageOffset;
@@ -147,7 +147,7 @@ ModbusMessage BmsModbus::FC06(ModbusMessage request)
         nvmSet.UseHoleCTRatio = words;
         break;
       case 10:
-        // nvmSet.TempOffset = words;
+        nvmSet.TempCutOff = words;
         break;
       case 11:
         nvmSet.AmpereOffset = words;
@@ -247,7 +247,7 @@ void BmsModbus::FC06_Broadcast(ModbusMessage request)
         nvmSet.UseHoleCTRatio = words;
         break;
       case 10:
-        nvmSet.TempOffset = words;
+        nvmSet.TempCutOff = words;
         break;
       case 11:
         nvmSet.AmpereOffset = words;

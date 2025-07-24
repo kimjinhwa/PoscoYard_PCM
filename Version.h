@@ -1,4 +1,5 @@
-#define VERSION "1.0.4"  // F04에 Ampere 값을 추가 하였다. 
+#define VERSION "1.0.5"  // 온도 컷오프 값을 추가 하였다. 
+//#define VERSION "1.0.4"  // F04에 Ampere 값을 추가 하였다. 
 //#define VERSION "1.0.3"  // 업데이트  할때 LED를 깜빡이게 함.
 //#define VERSION "1.0.2"  // 전류를 Float로 변경 
 //#define VERSION "1.0.1"  // 모든 기능을 구현 함. 
