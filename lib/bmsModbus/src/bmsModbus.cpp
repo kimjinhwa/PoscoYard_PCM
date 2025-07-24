@@ -48,9 +48,7 @@ ModbusMessage BmsModbus::FC03(ModbusMessage request)
   sendBuffer[16] = 0; //nvmSet.spiBalance02;
   sendBuffer[17] = 0; //nvmSet.CanIBalance;
   sendBuffer[18] = 0; //nvmSet.BalanceTargetVoltage;
-  sendBuffer[30] = (digitalRead(RELAY1_DISCHARGE) << 0) | 
-                   (digitalRead(RELAY2_CHARGE) << 1) | 
-                   (digitalRead(RELAY3_RESERVE) << 2);
+  sendBuffer[30] = relayControl.readRelayStatus();
   sendBuffer[31] = 0;
   sendBuffer[32] = nvmSet.CutOffChargeAmpere;
   sendBuffer[33] = nvmSet.CutOffDischargeAmpere;

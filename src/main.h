@@ -76,30 +76,43 @@ public:
     void relayAutoOnControl() {};
     void relayAutoOffControl() {};
     void all_off(){
-      digitalWrite(RELAY2_CHARGE, LOW); 
-      digitalWrite(RELAY1_DISCHARGE, LOW);
+      if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
+        digitalWrite(RELAY2_CHARGE, LOW); 
+        digitalWrite(RELAY1_DISCHARGE, LOW);
+      }
       if(isRelayChange()) userRelayOnTime =0 ; // 릴레이 상태가 변경되면 릴레이 온타임을 초기화
     }
     void all_charge_discharge(){
-      digitalWrite(RELAY2_CHARGE, HIGH); 
-      digitalWrite(RELAY1_DISCHARGE, HIGH);
+      if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
+        digitalWrite(RELAY2_CHARGE, HIGH); 
+        digitalWrite(RELAY1_DISCHARGE, HIGH);
+      }
       if(isRelayChange()) userRelayOnTime =0 ;
     }
     void only_charge(){
-      digitalWrite(RELAY2_CHARGE, HIGH); 
-      digitalWrite(RELAY1_DISCHARGE, LOW);
+      if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
+        digitalWrite(RELAY2_CHARGE, HIGH); 
+        digitalWrite(RELAY1_DISCHARGE, LOW);
+      }
       if(isRelayChange()) userRelayOnTime =0 ;
     }
     void only_discharge(){
-      digitalWrite(RELAY2_CHARGE, LOW); 
-      digitalWrite(RELAY1_DISCHARGE, HIGH);
+      if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
+        digitalWrite(RELAY2_CHARGE, LOW); 
+        digitalWrite(RELAY1_DISCHARGE, HIGH);
+      }
       if(isRelayChange()) userRelayOnTime =0 ;
     }
     void setRelayStatus(uint8_t status){
-      digitalWrite(RELAY2_CHARGE, status & 0x02);
-      digitalWrite(RELAY1_DISCHARGE, status & 0x01);
-      digitalWrite(RELAY3_RESERVE, status & 0x04);
-      if(isRelayChange()) userRelayOnTime =0 ;
+      if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
+        digitalWrite(RELAY2_CHARGE, status & 0x02);
+        digitalWrite(RELAY1_DISCHARGE, status & 0x01);
+        digitalWrite(RELAY3_RESERVE, status & 0x04);
+      }
+      if(isRelayChange()){
+        ESP_LOGI("RelayControl", "RelayStatus Changed %d", status);
+        userRelayOnTime =0 ;
+      } 
     }
     uint8_t readRelayStatus()
     {
@@ -112,7 +125,7 @@ public:
     /* 변경되면 true 반환 */
     bool isRelayChange()
     {
-        readRelayStatus();
+        readRelayStatus(); //  현재 상태를 읽는다.
         if (nowRelayStatus.value != lastRelayStatus.value)
         {
             lastRelayStatus.value = nowRelayStatus.value;
@@ -128,27 +141,15 @@ public:
         //         _ReadAmpereClass.ampereAverage);
         if (_ReadAmpereClass.ampereAverage > (float)nvmSet.CutOffChargeAmpere/10.0)
         {
-            if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
-                only_charge();
-                //SerialBT.printf("\nRelay2 Onn");
-                //Serial.printf("\nRelay2 Onn");
-            }
+                only_discharge();
         }
         else if (_ReadAmpereClass.ampereAverage < (float)nvmSet.CutOffDischargeAmpere/10.0)
         {
-            if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
-                only_discharge();
-                //SerialBT.printf("\nRelay1 On\n");
-                //Serial.printf("Relay1 On\n");
-            }
+                only_charge();
         }
         else
         {
-            if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
                 all_charge_discharge();
-                //SerialBT.printf("\nRelay2,1 On\n");
-                //Serial.printf("\nRelay2,1 On\n");
-            }
         }
     }
 };

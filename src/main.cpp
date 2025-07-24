@@ -55,7 +55,7 @@ void readAndWriteEprom(){
       nvmSet.GATEWAY = (uint32_t)IPAddress(192, 168, 1, 1);
       nvmSet.SUBNETMASK = (uint32_t)IPAddress(255, 255, 255, 0);
       nvmSet.UseHoleCTRatio = 100;
-      nvmSet.TempCutOff = 650;
+      nvmSet.TempCutOff = 6500;
       nvmSet.AmpereOffset = 0; 
       nvmSet.AmpereGain = 1220;
       nvmSet.TotalVoltageOffset = 0;
