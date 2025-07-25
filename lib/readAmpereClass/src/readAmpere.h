@@ -78,10 +78,10 @@ public:
   void initFIFO();
   float getampereAverage(){
     float retAmpere=0.0f;
-    if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS){
+    //if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS){
         retAmpere = ampereAverage;
-      xSemaphoreGive(ReadAmpereClass::dataMutex);
-    }
+     // xSemaphoreGive(ReadAmpereClass::dataMutex);
+    //}
     return ampereAverage;
   }
   static SemaphoreHandle_t dataMutex;
