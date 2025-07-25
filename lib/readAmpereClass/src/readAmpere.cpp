@@ -26,7 +26,11 @@ float ReadAmpereClass::updateAmpereFIFO(float newvalue) {
   for(int i=0; i<count; i++) {
     sum += ampereFIFO[i];
   }
-  ampereAverage = sum / count;
+
+  if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS){
+      ampereAverage = sum / count;
+      xSemaphoreGive(ReadAmpereClass::dataMutex);
+  }
   return ampereAverage;
 }
 
@@ -59,6 +63,5 @@ float ReadAmpereClass::readAmpereAdc()
       updateAmpereFIFO(ampere);
       xSemaphoreGive(ReadAmpereClass::dataMutex);
     }
-    //ESP_LOGI("AMPERE", "ampereAverate: %3.2f\n", ampereAverage);
     return ampere;
 }

@@ -239,12 +239,12 @@ void loop()
                 relayControl.readRelayStatus(),
                 (float)nvmSet.CutOffChargeAmpere/10.0,
                 (float)nvmSet.CutOffDischargeAmpere/10.0,
-                _ReadAmpereClass.ampereAverage);
+                _ReadAmpereClass.getampereAverage());
         Serial.printf("\r\nR:%d C:%3.2f D:%3.2f A:%3.1f",
                 relayControl.readRelayStatus(),
                 (float)nvmSet.CutOffChargeAmpere/10.0,
                 (float)nvmSet.CutOffDischargeAmpere/10.0,
-                _ReadAmpereClass.ampereAverage);
+                _ReadAmpereClass.getampereAverage());
     }
     delay(5);
 }

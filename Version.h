@@ -1,4 +1,5 @@
-#define VERSION "1.0.7"  // 전류에 10 배수하여 모드버스에 전달한다. 
+#define VERSION "1.0.8"  // ampereAverate를 세마포어로 설정한다. 
+//#define VERSION "1.0.7"  // 전류에 10 배수하여 모드버스에 전달한다. 
 //#define VERSION "1.0.6"  // 온토 컷오프는 의미 없다. 서버가 시키는대로 한다. 
 //#define VERSION "1.0.5"  // 온도 컷오프 값을 추가 하였다. 
 //#define VERSION "1.0.4"  // F04에 Ampere 값을 추가 하였다. 
