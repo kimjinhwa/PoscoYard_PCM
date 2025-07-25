@@ -87,7 +87,7 @@ ModbusMessage BmsModbus::FC04(ModbusMessage request)
     }
     sendBuffer[16] = 0;
     sendBuffer[17] = 0;
-    sendBuffer[18] = _ReadAmpereClass.ampereAverage; // current
+    sendBuffer[18] = _ReadAmpereClass.ampereAverage*10; // current
     sendBuffer[19] = 0;
     sendBuffer[20] = 0;
     sendBuffer[21] = 0;
