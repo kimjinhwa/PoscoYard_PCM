@@ -212,7 +212,7 @@ void loop()
     esp_task_wdt_reset();
     long currentTime = millis();
    
-    if(timerCount > 20)  // 200ms
+    if(timerCount > 20)  // 20ms
     {
         _ReadAmpereClass.readAmpereAdc();
         timerCount = 0;

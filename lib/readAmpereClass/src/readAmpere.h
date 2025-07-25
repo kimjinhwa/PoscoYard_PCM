@@ -68,6 +68,7 @@ typedef union {
 class ReadAmpereClass{
 private:
   float ampereFIFO[FIFO_SIZE];
+  float updateAmpereFIFO(float newvalue);
   int head;
   int count;
   float ampereAverage;
@@ -75,7 +76,6 @@ public:
   float VREF;
 	ReadAmpereClass();
   void initFIFO();
-  float updateAmpereFIFO(float newvalue);
   float getampereAverage(){
     float retAmpere=0.0f;
     if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS){
