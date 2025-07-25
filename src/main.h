@@ -139,11 +139,11 @@ public:
         //         (float)nvmSet.CutOffChargeAmpere/10.0,
         //         (float)nvmSet.CutOffDischargeAmpere/10.0,
         //         _ReadAmpereClass.ampereAverage);
-        if (_ReadAmpereClass.getampereAverage()> (float)nvmSet.CutOffChargeAmpere/10.0)
+        if (_ReadAmpereClass.getAmpereAverage()> (float)nvmSet.CutOffChargeAmpere/10.0)
         {
                 only_discharge();
         }
-        else if (_ReadAmpereClass.getampereAverage()< (float)nvmSet.CutOffDischargeAmpere/10.0)
+        else if (_ReadAmpereClass.getAmpereAverage()< (float)nvmSet.CutOffDischargeAmpere/10.0)
         {
                 only_charge();
         }

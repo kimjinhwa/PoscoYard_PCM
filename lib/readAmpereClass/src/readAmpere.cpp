@@ -16,24 +16,27 @@ void ReadAmpereClass::initFIFO()
   for (int j = 0; j < FIFO_SIZE; j++)  // 20 samples per cell
     ampereFIFO[j] = 0;
 }
-float ReadAmpereClass::updateAmpereFIFO(float newvalue) {
+float ReadAmpereClass::updateAmpereFIFO(float newvalue)
+{
   ampereFIFO[head] = newvalue;
   head = (head + 1) % FIFO_SIZE;
-  if(count < FIFO_SIZE) {
+  if (count < FIFO_SIZE)
+  {
     count++;
   }
-  float sum = 0.0f;
-  for(int i=0; i<count; i++) {
-    sum += ampereFIFO[i];
-  }
+  if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS)
+  {
+    float sum = 0.0f;
+    for (int i = 0; i < count; i++)
+    {
+      sum += ampereFIFO[i];
+    }
 
-  if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS){
-      ampereAverage = sum / count;
-      xSemaphoreGive(ReadAmpereClass::dataMutex);
+    ampereAverage = sum / count;
+    xSemaphoreGive(ReadAmpereClass::dataMutex);
   }
   return ampereAverage;
 }
-
 
 ReadAmpereClass::ReadAmpereClass()
 {
@@ -58,10 +61,6 @@ float ReadAmpereClass::readAmpereAdc()
     float ampere = voltage * nvmSet.UseHoleCTRatio /HOLE_CT_V ;
     ampere *= holeCTdirection;
     //ESP_LOGI("AMPERE", "ampere: %d\n", (int32_t)ampere);
-    if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS)
-    {
-      updateAmpereFIFO(ampere);
-      xSemaphoreGive(ReadAmpereClass::dataMutex);
-    }
+    updateAmpereFIFO(ampere);
     return ampere;
 }

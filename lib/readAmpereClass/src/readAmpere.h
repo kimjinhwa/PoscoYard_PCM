@@ -72,20 +72,22 @@ private:
   int head;
   int count;
   float ampereAverage;
+  static SemaphoreHandle_t dataMutex;
 public:
   float VREF;
 	ReadAmpereClass();
   void initFIFO();
-  float getampereAverage(){
-    float retAmpere=0.0f;
-    //if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS){
-        retAmpere = ampereAverage;
-     // xSemaphoreGive(ReadAmpereClass::dataMutex);
-    //}
-    return ampereAverage;
-  }
-  static SemaphoreHandle_t dataMutex;
-	float readAmpereAdc();
+  float getAmpereAverage()
+  {
+    float retAmpere = 0.0f;
+    if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS)
+    {
+      retAmpere = ampereAverage;
+      xSemaphoreGive(ReadAmpereClass::dataMutex);
+    }
+    return retAmpere;
+  };
+  float readAmpereAdc();
 };
 extern ReadAmpereClass _ReadAmpereClass;
 #endif

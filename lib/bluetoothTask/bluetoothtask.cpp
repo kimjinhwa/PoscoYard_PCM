@@ -110,7 +110,7 @@ void again_Callback(cmd *cmdPtr)
         EEPROM.commit(); //Commit EEPROM
         EEPROM.readBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); //Read from EEPROM
         SerialBT.printf("OFFSET : %d\n", nvmSet.AmpereOffset);
-        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getampereAverage());
+        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getAmpereAverage());
         SerialBT.printf("New GAIN : %d\n", nvmSet.AmpereGain);
 
     }
@@ -118,7 +118,7 @@ void again_Callback(cmd *cmdPtr)
     else{
         SerialBT.printf("GAIN : %d\n", nvmSet.AmpereGain);
         SerialBT.printf("OFFSET : %d\n", nvmSet.AmpereOffset);
-        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getampereAverage());
+        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getAmpereAverage());
     }
 
 }
@@ -152,13 +152,13 @@ void aoffset_Callback(cmd *cmdPtr)
         EEPROM.commit(); //Commit EEPROM
         EEPROM.readBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); //Read from EEPROM
         SerialBT.printf("GAIN : %d\n", nvmSet.AmpereGain);
-        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getampereAverage());
+        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getAmpereAverage());
         SerialBT.printf("New OFFSET : %d\n", nvmSet.AmpereOffset);
     }
     else{
         SerialBT.printf("OFFSET : %d\n", nvmSet.AmpereOffset);
         SerialBT.printf("GAIN : %d\n", nvmSet.AmpereGain);
-        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getampereAverage());
+        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getAmpereAverage());
     }
 
 }
@@ -196,13 +196,13 @@ void UseHoleCTRatio_Callback(cmd *cmdPtr)
         EEPROM.readBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); //Read from EEPROM
         SerialBT.printf("GAIN : %d\n", nvmSet.AmpereGain);
         SerialBT.printf("OFFSET : %d\n", nvmSet.AmpereOffset);
-        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getampereAverage());
+        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getAmpereAverage());
     }
     else{
         SerialBT.printf("Current USE HOLE CT : %d\n", nvmSet.UseHoleCTRatio);
         SerialBT.printf("GAIN : %d\n", nvmSet.AmpereGain);
         SerialBT.printf("OFFSET : %d\n", nvmSet.AmpereOffset);
-        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getampereAverage());
+        SerialBT.printf("Current [AMPERE] : %2.2f\n", _ReadAmpereClass.getAmpereAverage());
     }
 }
 void help_Callback(cmd *c){

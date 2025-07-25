@@ -79,7 +79,6 @@ ModbusMessage BmsModbus::FC04(ModbusMessage request)
   uint16_t words;             // requested number of registers
   ModbusMessage response;     // response message to be sent back
 
-  if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS)
   {
     for (int i = 0; i < nvmSet.InstalledCells; i++)
     {
@@ -87,12 +86,11 @@ ModbusMessage BmsModbus::FC04(ModbusMessage request)
     }
     sendBuffer[16] = 0;
     sendBuffer[17] = 0;
-    sendBuffer[18] = (int16_t)_ReadAmpereClass.getampereAverage()*10; // current
+    sendBuffer[18] = (int16_t)_ReadAmpereClass.getAmpereAverage()*10; // current
     sendBuffer[19] = 0;
     sendBuffer[20] = 0;
     sendBuffer[21] = 0;
     sendBuffer[22] = 0;
-    xSemaphoreGive(ReadAmpereClass::dataMutex);
   }
   // get request values
   request.get(2, address);
