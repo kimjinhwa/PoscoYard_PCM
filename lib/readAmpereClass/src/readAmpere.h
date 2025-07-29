@@ -62,7 +62,7 @@ typedef union {
 
 
 
-#define FIFO_SIZE 20
+#define FIFO_SIZE 30
 
 
 class ReadAmpereClass{

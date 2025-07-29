@@ -1,4 +1,5 @@
-#define VERSION "1.0.10"  // bug 해결  
+#define VERSION "1.0.11"  // Ampere 읽기를 2ms 로 변경 
+//#define VERSION "1.0.10"  // bug 해결  
 //#define VERSION "1.0.9"  // ampereAverate를 세마포어로 설정한다. 
 //#define VERSION "1.0.7"  // 전류에 10 배수하여 모드버스에 전달한다. 
 //#define VERSION "1.0.6"  // 온토 컷오프는 의미 없다. 서버가 시키는대로 한다. 
