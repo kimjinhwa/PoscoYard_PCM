@@ -104,12 +104,14 @@ public:
       if(isRelayChange()) userRelayOnTime =0 ;
     }
     void setRelayStatus(uint8_t status){
-      if(userRelayOnTime > nvmSet.RelayDelayTime * 1000){
+      if(userRelayOnTime > nvmSet.RelayDelayTime * 1000)
+      {
         digitalWrite(RELAY2_CHARGE, status & 0x02);
         digitalWrite(RELAY1_DISCHARGE, status & 0x01);
         digitalWrite(RELAY3_RESERVE, status & 0x04);
       }
-      if(isRelayChange()){
+      if(isRelayChange())
+      {
         ESP_LOGI("RelayControl", "RelayStatus Changed %d", status);
         userRelayOnTime =0 ;
       } 

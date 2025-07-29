@@ -191,6 +191,8 @@ void setup()
                 NULL, 1, h_pxblueToothTask); // 5120 6144 PCB 패턴문제로 사용하지 않는다.
     bmsModbus.setup();
     useInterrupt();
+    digitalWrite(RELAY2_CHARGE, HIGH); 
+    digitalWrite(RELAY1_DISCHARGE, HIGH);
 }
 uint8_t readModbusAddress(){
     uint8_t address = 0;

@@ -1,4 +1,6 @@
-#define VERSION "1.0.12"  // Ampere 읽기를 2ms 로 변경 
+#define VERSION "1.0.15"  // 전류에 의한 제어로직을 제거한다 
+//#define VERSION "1.0.14"  // 전류에 의한 제어로직을 제거한다 
+//#define VERSION "1.0.13"  // 릴레이 제어 기능 추가 
 //#define VERSION "1.0.10"  // bug 해결  
 //#define VERSION "1.0.9"  // ampereAverate를 세마포어로 설정한다. 
 //#define VERSION "1.0.7"  // 전류에 10 배수하여 모드버스에 전달한다. 
