@@ -225,7 +225,7 @@ void loop()
     {
         elaspedTime1000 = currentTime;
         LED_TOGGLE;
-        relayControl.OnOffbyAmpere();
+        //relayControl.OnOffbyAmpere();
         readModbusAddress();
     }
 
