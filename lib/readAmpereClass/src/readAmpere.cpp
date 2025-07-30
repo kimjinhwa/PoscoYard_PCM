@@ -3,12 +3,29 @@
 #include <SPI.h>
 #include <ThreeWire.h>
 #include <math.h>
+#include <BluetoothSerial.h>
 #include "freertos/FreeRTOS.h"
 #include "../../src/main.h"
 #include "esp_adc_cal.h"
 
+extern BluetoothSerial SerialBT;
 SemaphoreHandle_t ReadAmpereClass::dataMutex = NULL;
 
+ReadAmpereClass::ReadAmpereClass()
+{
+    if(dataMutex == NULL) dataMutex = xSemaphoreCreateMutex();
+    ratedBatteryCurrent = 100;  // 먼저 설정
+    accumulatedDischargeCurrent = 0;
+    accumulatedDischargeTime = 0;
+    accumulatedChargeCurrent = 0;  // 100Ah로 초기화 (100% SOC)
+    accumulatedChargeTime = 0;
+    isNowChargeing = false;
+    isNowDischarging = false;
+    systemStartTime = millis();
+    ChargeStartTime = 0;
+    DischargeStartTime = 0;
+    StateOfCharge = 100.0f;  // 초기 SOC를 100%로 설정
+}
 void ReadAmpereClass::initFIFO() 
 {
   head = 0;
@@ -32,11 +49,80 @@ float ReadAmpereClass::updateAmpereFIFO(float newvalue)
   return ampereAverage;
 }
 
-ReadAmpereClass::ReadAmpereClass()
-{
-    if(dataMutex == NULL) dataMutex = xSemaphoreCreateMutex();
-}
 
+static long every1000ms = 0;
+void ReadAmpereClass::accumulateCurrent()
+{
+  // 1초마다 실행
+  if (millis() - every1000ms >= 1000)
+  {
+    every1000ms = millis();
+    
+    // 충전/방전 상태 판단 (3A 이상)
+    if (ampereAverage > 3.0f)
+    {
+      isNowChargeing = true;
+      isNowDischarging = false;
+      accumulatedDischargeTime = 0;
+      DischargeStartTime = millis();
+    }
+    else if (ampereAverage < -3.0f)
+    {
+      isNowDischarging = true;
+      isNowChargeing = false;
+      accumulatedChargeTime = 0;
+      ChargeStartTime = millis();
+    }
+    else
+    {
+      isNowChargeing = false;
+      isNowDischarging = false;
+    }
+    
+    // 1초간의 전류를 Ah 단위로 변환 (1초 = 1/3600 시간)
+    float currentAh = ampereAverage / 3600.0f;
+    
+    // 충전/방전 전류 누적
+    if (isNowChargeing)
+    {
+      accumulatedChargeCurrent += currentAh;
+      accumulatedChargeTime = millis() - ChargeStartTime;
+      ESP_LOGI("\nReadAmpereClass", "충전 전류: %f Ah, 누적 충전량: %f Ah, 누적 충전시간: %ld ms", 
+        currentAh, accumulatedChargeCurrent, accumulatedChargeTime);
+    }
+    else if (isNowDischarging)
+    {
+      accumulatedDischargeCurrent += abs(currentAh); // 절댓값으로 방전량 누적
+      accumulatedDischargeTime = millis() - DischargeStartTime;
+      ESP_LOGI("\nReadAmpereClass", "방전 전류: %f Ah, 누적 방전량: %f Ah, 누적 방전시간: %ld ms", 
+        currentAh, accumulatedDischargeCurrent, accumulatedDischargeTime);
+    }
+    
+    // 만충전 설정 시 SOC를 100%로 설정
+    if (isFullChargeSet)
+    {
+      accumulatedChargeCurrent = ratedBatteryCurrent; // Ah 단위 그대로 사용
+      accumulatedDischargeCurrent = 0;
+      isFullChargeSet = false;
+      StateOfCharge = 100.0f;
+    }
+    else
+    {
+      // SOC 계산: (초기 용량 - 누적 방전량 + 누적 충전량) / 총 용량 × 100%
+      float totalCapacity = ratedBatteryCurrent; // Ah 단위 그대로 사용
+      float currentCapacity = totalCapacity - accumulatedDischargeCurrent + accumulatedChargeCurrent;
+      
+      // SOC 범위 제한 (0~100%)
+      StateOfCharge = constrain(currentCapacity / totalCapacity * 100.0f, 0.0f, 100.0f);
+      if(StateOfCharge == 100.0f){
+        accumulatedChargeCurrent = 0;
+        accumulatedDischargeCurrent = 0;
+      }
+      ESP_LOGI("\nReadAmpereClass", "SOC: %f %f %f", StateOfCharge, accumulatedDischargeCurrent, accumulatedChargeCurrent);
+      SerialBT.printf("\nSOC: %3.2f %3.2f %3.2f\n", StateOfCharge, accumulatedDischargeCurrent, accumulatedChargeCurrent);
+    }
+  }
+}
 float ReadAmpereClass::readAmpereAdc()
 {
     uint32_t adc_voltage1;
@@ -50,5 +136,6 @@ float ReadAmpereClass::readAmpereAdc()
     float ampere = voltage * nvmSet.UseHoleCTRatio /HOLE_CT_V ;
     ampere *= holeCTdirection;
     updateAmpereFIFO(ampere);
+    accumulateCurrent();
     return ampere;
 }

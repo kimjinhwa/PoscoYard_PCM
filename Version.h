@@ -1,4 +1,6 @@
-#define VERSION "1.0.15"  // 전류에 의한 제어로직을 제거한다 
+#define VERSION "1.0.17"  // SOC 값을 추가 하였다. 
+//#define VERSION "1.0.16"  // 충방전 전류에 대한 누적 값과 누적시간을 추가 하였다. 
+//#define VERSION "1.0.15"  // 전류에 의한 제어로직을 제거한다 
 //#define VERSION "1.0.14"  // 전류에 의한 제어로직을 제거한다 
 //#define VERSION "1.0.13"  // 릴레이 제어 기능 추가 
 //#define VERSION "1.0.10"  // bug 해결  

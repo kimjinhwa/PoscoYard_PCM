@@ -65,16 +65,30 @@ typedef union {
 #define FIFO_SIZE 30
 
 
+
 class ReadAmpereClass{
 private:
   float ampereFIFO[FIFO_SIZE];
   float updateAmpereFIFO(float newvalue);
+  void accumulateCurrent();
   int head;
   int count;
   float ampereAverage;
   static SemaphoreHandle_t dataMutex;
 public:
   float VREF;
+  float accumulatedDischargeCurrent;
+  long accumulatedDischargeTime;
+  float accumulatedChargeCurrent;
+  long accumulatedChargeTime;
+  long systemStartTime;
+  long ChargeStartTime;
+  long DischargeStartTime;
+  bool isNowChargeing;
+  bool isNowDischarging;
+  bool isFullChargeSet;
+  float StateOfCharge;
+  uint16_t ratedBatteryCurrent;
 	ReadAmpereClass();
   void initFIFO();
   float getAmpereAverage()

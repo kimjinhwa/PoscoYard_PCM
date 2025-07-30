@@ -26,35 +26,51 @@ ModbusMessage BmsModbus::FC03(ModbusMessage request)
   EEPROM.readBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); //Read from EEPROM
 
   String ver = String(VERSION);
+  F03_Addr f03Addr;
 
   memset(sendBuffer, 0, sizeof(sendBuffer));
   EEPROM.readBytes(0, (byte *)&nvmSet, sizeof(nvmSystemSet)); //Read from EEPROM
-  sendBuffer[0] = nvmSet.ModbusAddress; // modbus address
-  sendBuffer[1] = nvmSet.InstalledCells; // installed cells
-  sendBuffer[2] = nvmSet.Max1161_RefVolt;  // reference voltage
-  sendBuffer[3] = nvmSet.Max1161_CellGain;  // gain
-  sendBuffer[4] = nvmSet.Max1161_CellOffset;  // offset
-  sendBuffer[5] = firmVersion[0];  // major version
-  sendBuffer[6] = firmVersion[1];  // minor version
-  sendBuffer[7] = firmVersion[2];  // patch version
-  sendBuffer[8] = 0;
-  sendBuffer[9] = nvmSet.UseHoleCTRatio;
-  sendBuffer[10] = nvmSet.TempCutOff;
-  sendBuffer[11] = nvmSet.AmpereOffset;
-  sendBuffer[12] = nvmSet.AmpereGain;
-  sendBuffer[13] = nvmSet.TotalVoltageOffset;
-  sendBuffer[14] = nvmSet.TotalVoltageGain;
-  sendBuffer[15] = 0; //nvmSet.spiBalance01;
-  sendBuffer[16] = 0; //nvmSet.spiBalance02;
-  sendBuffer[17] = 0; //nvmSet.CanIBalance;
-  sendBuffer[18] = 0; //nvmSet.BalanceTargetVoltage;
-  sendBuffer[30] = relayControl.readRelayStatus();
-  sendBuffer[31] = 0;
-  sendBuffer[32] = nvmSet.CutOffChargeAmpere;
-  sendBuffer[33] = nvmSet.CutOffDischargeAmpere;
-  sendBuffer[34] = nvmSet.ResumeGapAmpere;
-  sendBuffer[35] = nvmSet.RelayDelayTime;
-  sendBuffer[36] = nvmSet.HoleCTdirection;
+  sendBuffer[F03_Addr::MODBUSADDRESS] = nvmSet.ModbusAddress; // modbus address
+  sendBuffer[F03_Addr::INSTALLEDCELLS] = nvmSet.InstalledCells; // installed cells
+  sendBuffer[F03_Addr::MAX1161_REFVOLT] = nvmSet.Max1161_RefVolt;  // reference voltage
+  sendBuffer[F03_Addr::MAX1161_CELLGAIN] = nvmSet.Max1161_CellGain;  // gain
+  sendBuffer[F03_Addr::MAX1161_CELLOFFSET] = nvmSet.Max1161_CellOffset;  // offset
+  sendBuffer[F03_Addr::MAJORVERSION] = firmVersion[0];  // major version
+  sendBuffer[F03_Addr::MINORVERSION] = firmVersion[1];  // minor version
+  sendBuffer[F03_Addr::PATCHVERSION] = firmVersion[2];  // patch version
+  sendBuffer[F03_Addr::OPENWIRESTATUS] = 0; //OpenWireStatus
+  sendBuffer[F03_Addr::USEHOLECTRATIO] = nvmSet.UseHoleCTRatio;
+  sendBuffer[F03_Addr::TEMPCUTOFF] = nvmSet.TempCutOff;
+  sendBuffer[F03_Addr::AMPEREOFFSET] = nvmSet.AmpereOffset;
+  sendBuffer[F03_Addr::AMPEREGAIN] = nvmSet.AmpereGain;
+  sendBuffer[F03_Addr::TOTALVOLTAGEOFFSET] = nvmSet.TotalVoltageOffset;
+  sendBuffer[F03_Addr::TOTALVOLTAGEGAIN] = nvmSet.TotalVoltageGain;
+  sendBuffer[F03_Addr::SPIBALANCE01] = 0; // SpiBalance01
+  sendBuffer[F03_Addr::SPIBALANCE02] = 0; // SpiBalance02
+  sendBuffer[F03_Addr::MODBUSCANBALANCE] = 0; // ModbusCanBalance
+  sendBuffer[F03_Addr::BALANCETARGETVOLTAGE] = 0; // BalanceTargetVoltage
+  sendBuffer[F03_Addr::ACCUMULATEDDISCHARGECURRENT] = 
+    (int16_t)_ReadAmpereClass.accumulatedDischargeCurrent*10.0f; //AccumulatedDischargeCurrent
+  sendBuffer[F03_Addr::ACCUMULATEDDISCHARGETIME] = 
+    (uint16_t)_ReadAmpereClass.accumulatedDischargeTime/1000; //AccumulatedDischargeTime
+  sendBuffer[F03_Addr::ACCUMULATEDCHARGECURRENT] = 
+    (uint16_t)_ReadAmpereClass.accumulatedChargeCurrent*10.0f; //AccumulatedChargeCurrent
+  sendBuffer[F03_Addr::ACCUMULATEDCHARGETIME] = 
+    (int16_t)_ReadAmpereClass.accumulatedChargeTime/1000; //AccumulatedChargeTime
+  sendBuffer[F03_Addr::FULLCHARGESET] = _ReadAmpereClass.isFullChargeSet;
+  sendBuffer[F03_Addr::RATED_BATTERY_CURRENT] = _ReadAmpereClass.ratedBatteryCurrent;
+  sendBuffer[F03_Addr::STATE_OF_CHARGE] = (int16_t)10.0f*_ReadAmpereClass.StateOfCharge;
+  sendBuffer[F03_Addr::RESERVER26] = 0;
+  sendBuffer[F03_Addr::RESERVER27] = 0;
+  sendBuffer[F03_Addr::RESERVER28] = 0;
+  sendBuffer[F03_Addr::RESERVER29] = 0;
+  sendBuffer[F03_Addr::PCMBOARSTATUS] = relayControl.readRelayStatus();
+  sendBuffer[F03_Addr::PCMBOARDSET] = 0;
+  sendBuffer[F03_Addr::CUTOFFCHARGEAMPERE] = nvmSet.CutOffChargeAmpere;
+  sendBuffer[F03_Addr::CUTOFFDISCHARGEAMPERE] = nvmSet.CutOffDischargeAmpere;
+  sendBuffer[F03_Addr::RESUMEGAPAMPERE] = nvmSet.ResumeGapAmpere;
+  sendBuffer[F03_Addr::RELAYDELAYTIME] = nvmSet.RelayDelayTime;
+  sendBuffer[F03_Addr::HOLECTDIRECTION] = nvmSet.HoleCTdirection;
   // get request values
   request.get(2, address);
   request.get(4, words);
@@ -168,6 +184,27 @@ ModbusMessage BmsModbus::FC06(ModbusMessage request)
         break;
       case 18:
         //Balance TargetVoltage
+        break;
+      case 19:
+        _ReadAmpereClass.accumulatedDischargeCurrent = words;
+        break;
+      case 20:
+        _ReadAmpereClass.accumulatedDischargeTime = words;
+        break;
+      case 21:
+        _ReadAmpereClass.accumulatedChargeCurrent = words;
+        break;
+      case 22:
+        _ReadAmpereClass.accumulatedChargeTime = words;
+        break;
+      case 23:
+        _ReadAmpereClass.isFullChargeSet = words;
+        break;
+      case 24:
+        _ReadAmpereClass.ratedBatteryCurrent = words;
+        break;
+      case 25:
+        _ReadAmpereClass.StateOfCharge = words;
         break;
       case 30:  // PCM Board Status  
         break;

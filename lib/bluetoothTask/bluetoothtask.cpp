@@ -239,7 +239,7 @@ Command again;
 Command aoffset;
 Command maxChargeAmpere_command;
 Command minDischargeAmpere_command;
-Command UseHoleCTRatio;
+Command UseHoleCTRatio_command;
 Command help;
 Command ip;
 void simpleCliSetup()
@@ -266,8 +266,8 @@ void simpleCliSetup()
     maxChargeAmpere_command.setDescription("Set the Max Charge Ampere");
     minDischargeAmpere_command = simpleCli.addSingleArgCmd("min/Ampere", minDischargeAmpere_Callback);//OFFSET
     minDischargeAmpere_command.setDescription("Set the Min Discharge Ampere");
-    UseHoleCTRatio = simpleCli.addSingleArgCmd("use/current", UseHoleCTRatio_Callback);//USE HOLE CT
-    UseHoleCTRatio.setDescription("Set the USE HOLE CT");
+    UseHoleCTRatio_command = simpleCli.addSingleArgCmd("use/current", UseHoleCTRatio_Callback);//USE HOLE CT
+    UseHoleCTRatio_command.setDescription("Set the USE HOLE CT");
     ip = simpleCli.addSingleArgCmd("ip", ip_Callback);//IP
     ip.setDescription("Read the IPAddress,GW,SUBNETMASK");
     help = simpleCli.addCommand("help",help_Callback); 
