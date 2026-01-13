@@ -47,14 +47,20 @@ void ReadAmpereClass::initFIFO()
 }
 float ReadAmpereClass::updateAmpereFIFO(float newvalue)
 {
-  ampereFIFO[head] = newvalue;
-  head = (head + 1) % FIFO_SIZE;
-  if (count < FIFO_SIZE) count++;
   if (xSemaphoreTake(ReadAmpereClass::dataMutex, portMAX_DELAY) == pdPASS)
   {
+    // FIFO에 새 값 저장 (뮤텍스 보호 내에서)
+    ampereFIFO[head] = newvalue;
+    head = (head + 1) % FIFO_SIZE;
+    if (count < FIFO_SIZE) count++;
+
+    // 순환 버퍼에서 평균 계산: head는 다음 저장 위치이므로, head-1부터 역순으로 count개 읽기
     float sum = 0.0f;
     for (int i = 0; i < count; i++)
-      sum += ampereFIFO[i];
+    {
+      int idx = (head - 1 - i + FIFO_SIZE) % FIFO_SIZE;  // head-1부터 역순으로
+      sum += ampereFIFO[idx];
+    }
     ampereAverage = sum / count;
     xSemaphoreGive(ReadAmpereClass::dataMutex);
   }

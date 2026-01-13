@@ -1,4 +1,5 @@
-#define VERSION "1.0.19"  // AmpRead초기화 부분변경
+#define VERSION "1.0.20"  // AmpRead부분을 변경한다.
+//#define VERSION "1.0.19"  // AmpRead초기화 부분변경
 //예스파워를 진행하면서 수정한다.
 //#define VERSION "1.0.18"  // SOC 값을 추가 하였다. 
 //#define VERSION "1.0.16"  // 충방전 전류에 대한 누적 값과 누적시간을 추가 하였다. 
