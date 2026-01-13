@@ -7,9 +7,12 @@
 #include "freertos/FreeRTOS.h"
 #include "../../src/main.h"
 #include "esp_adc_cal.h"
+#include "driver/adc.h"
 
 extern BluetoothSerial SerialBT;
 SemaphoreHandle_t ReadAmpereClass::dataMutex = NULL;
+static esp_adc_cal_characteristics_t adc_chars;
+static bool adc_initialized = false;
 
 ReadAmpereClass::ReadAmpereClass()
 {
@@ -25,6 +28,15 @@ ReadAmpereClass::ReadAmpereClass()
     ChargeStartTime = 0;
     DischargeStartTime = 0;
     StateOfCharge = 100.0f;  // 초기 SOC를 100%로 설정
+        
+    // ADC 초기화 (한 번만)
+    if(!adc_initialized) {
+        adc1_config_width(ADC_WIDTH_BIT_12);  // 12bit 해상도
+        adc1_config_channel_atten(ADC1_CHANNEL_0, ADC_ATTEN_DB_12);  // GPIO36, 0~3.3V 범위
+        esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_12, ADC_WIDTH_BIT_12, 1100, &adc_chars);
+        adc_initialized = true;
+        Serial.println("ADC1_CH0 (GPIO36) initialized for current sensor");
+    }
 }
 void ReadAmpereClass::initFIFO() 
 {
@@ -127,9 +139,9 @@ float ReadAmpereClass::readAmpereAdc()
 {
     uint32_t adc_voltage1;
     int holeCTdirection = nvmSet.HoleCTdirection == 0 ? 1 : -1;
-    esp_adc_cal_characteristics_t adc_chars;
-    esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_12, ADC_WIDTH_BIT_12, 1100, &adc_chars);
-    esp_adc_cal_get_voltage(ADC_CHANNEL_0, &adc_chars, &adc_voltage1);  // IN_TH = GPIO39 = ADC1_CH3
+    // AMP_OUT 읽기: GPIO36 = ADC1_CH0
+    // ADC는 생성자에서 이미 초기화됨
+    esp_adc_cal_get_voltage(ADC_CHANNEL_0, &adc_chars, &adc_voltage1);  // AMP_OUT = GPIO36 = ADC1_CH0
     adc_voltage1 += nvmSet.AmpereOffset;
     adc_voltage1 = adc_voltage1 * nvmSet.AmpereGain / 1000.0;
     float voltage = (adc_voltage1 - 2000.0) * 2.0;  // 읽은 전압에서 중간값인 2.0V를 빼서 중간값을 0V로 만든다.
