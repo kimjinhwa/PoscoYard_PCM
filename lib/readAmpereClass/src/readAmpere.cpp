@@ -79,17 +79,29 @@ void ReadAmpereClass::accumulateCurrent()
     // 충전/방전 상태 판단 (3A 이상)
     if (ampereAverage > 3.0f)
     {
+      // 충전 상태로 처음 바뀔 때만 시작 시간 설정 및 방전량 리셋
+      if (!isNowChargeing)
+      {
+        ChargeStartTime = millis();
+        accumulatedDischargeCurrent = 0;  // 충전 시작 시 이전 방전량 리셋
+        accumulatedDischargeTime = 0;
+      }
       isNowChargeing = true;
       isNowDischarging = false;
-      accumulatedDischargeTime = 0;
       DischargeStartTime = millis();
     }
     else if (ampereAverage < -3.0f)
     {
+      // 방전 상태로 처음 바뀔 때만 시작 시간 설정 및 충전량 리셋
+      if (!isNowDischarging)
+      {
+        DischargeStartTime = millis();
+        accumulatedChargeCurrent = 0;  // 방전 시작 시 이전 충전량 리셋
+        accumulatedChargeTime = 0;
+      }
       isNowDischarging = true;
       isNowChargeing = false;
       accumulatedChargeTime = 0;
-      ChargeStartTime = millis();
     }
     else
     {
@@ -105,17 +117,17 @@ void ReadAmpereClass::accumulateCurrent()
     {
       accumulatedChargeCurrent += currentAh;
       accumulatedChargeTime = millis() - ChargeStartTime;
-      ESP_LOGI("\nReadAmpereClass", "충전 전류: %f Ah, 누적 충전량: %f Ah, 누적 충전시간: %ld ms", 
-        currentAh, accumulatedChargeCurrent, accumulatedChargeTime);
+      ESP_LOGI("\nReadAmpereClass", "충전 중 - 현재 전류: %.2f A, 1초간 충전량: %.6f Ah, 누적 충전량: %.6f Ah, 누적 충전시간: %ld ms", 
+        ampereAverage, currentAh, accumulatedChargeCurrent, accumulatedChargeTime);
     }
     else if (isNowDischarging)
     {
       accumulatedDischargeCurrent += abs(currentAh); // 절댓값으로 방전량 누적
       accumulatedDischargeTime = millis() - DischargeStartTime;
-      ESP_LOGI("\nReadAmpereClass", "방전 전류: %f Ah, 누적 방전량: %f Ah, 누적 방전시간: %ld ms", 
-        currentAh, accumulatedDischargeCurrent, accumulatedDischargeTime);
+      ESP_LOGI("\nReadAmpereClass", "방전 중 - 현재 전류: %.2f A, 1초간 방전량: %.6f Ah, 누적 방전량: %.6f Ah, 누적 방전시간: %ld ms",
+               ampereAverage, abs(currentAh), accumulatedDischargeCurrent, accumulatedDischargeTime);
     }
-    
+
     // 만충전 설정 시 SOC를 100%로 설정
     if (isFullChargeSet)
     {
@@ -132,10 +144,7 @@ void ReadAmpereClass::accumulateCurrent()
       
       // SOC 범위 제한 (0~100%)
       StateOfCharge = constrain(currentCapacity / totalCapacity * 100.0f, 0.0f, 100.0f);
-      if(StateOfCharge == 100.0f){
-        accumulatedChargeCurrent = 0;
-        accumulatedDischargeCurrent = 0;
-      }
+
       ESP_LOGI("\nReadAmpereClass", "SOC: %f %f %f", StateOfCharge, accumulatedDischargeCurrent, accumulatedChargeCurrent);
       SerialBT.printf("\nSOC: %3.2f %3.2f %3.2f\n", StateOfCharge, accumulatedDischargeCurrent, accumulatedChargeCurrent);
     }
